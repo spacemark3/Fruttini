@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="Fruttino — un piccolo frutto, una delicata sorpresa. Una storia 3D animata: dalla polpa di frutta, l'acqua e lo zucchero al Fruttino." />
+    <meta name="theme-color" content="#fdf6ee" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Cpath d=%22M4 14a12 10 0 0 1 24 0z%22 fill=%22%23f08526%22/%3E%3Crect x=%224%22 y=%2214%22 width=%2224%22 height=%225%22 rx=%222%22 fill=%22%23fbf8f1%22/%3E%3Cpath d=%22M4 19h24a12 10 0 0 1-24 0z%22 fill=%22%23f08526%22/%3E%3C/svg%3E" />
+    <title>Fruttino — La storia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,400;1,500&family=Marcellus&display=swap" rel="stylesheet" />
+    <!-- Critical styles: the loader is painted on the very first frame, before
+         the main stylesheet, the fonts and the 3D scene are ready. -->
+    <style>
+      html { background: #acd8e5; }
+      html:not(.is-ready) body > :not(.loader) { visibility: hidden; }
+      .loader {
+        position: fixed; inset: 0; z-index: 100;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px;
+        background: radial-gradient(120% 90% at 50% 40%, #acd8e5 0%, #acd8e5 35%, #9fd0df 100%);
+        transition: opacity 0.7s ease, visibility 0.7s;
+      }
+      html.is-ready .loader { opacity: 0; visibility: hidden; pointer-events: none; }
+      .loader-fruttino { position: relative; width: 88px; height: 80px; }
+      .lf-top, .lf-bottom {
+        position: absolute; left: 0; width: 88px; height: 31px;
+        background-color: #ee7a22;
+        background-image:
+          radial-gradient(circle, rgba(255,245,230,.85) 0 1px, transparent 1.4px),
+          radial-gradient(circle, rgba(255,245,230,.6) 0 0.8px, transparent 1.2px);
+        background-size: 9px 7px, 13px 11px;
+        background-position: 0 0, 4px 3px;
+      }
+      .lf-top { top: 0; border-radius: 44px 44px 10px 10px / 31px 31px 6px 6px; animation: lf-top 1.6s ease-in-out infinite; }
+      .lf-bottom { bottom: 0; border-radius: 10px 10px 44px 44px / 6px 6px 31px 31px; animation: lf-bottom 1.6s ease-in-out infinite; }
+      .lf-cream {
+        position: absolute; left: 3px; top: 31px; width: 82px; height: 18px;
+        background: #fbf8f1; border-radius: 9px; animation: lf-cream 1.6s ease-in-out infinite;
+      }
+      @keyframes lf-top { 0%, 100% { transform: translateY(-11px); } 45%, 62% { transform: translateY(0); } }
+      @keyframes lf-bottom { 0%, 100% { transform: translateY(11px); } 45%, 62% { transform: translateY(0); } }
+      @keyframes lf-cream { 0%, 100% { transform: scale(0.7, 0.75); } 45%, 62% { transform: scale(1.04, 1); } }
+      .loader-brand { margin: 0; font: italic 500 34px/1 'Cormorant Garamond', Georgia, serif; color: #8b1a1f; }
+      .loader-bar { width: 150px; height: 2px; background: rgba(139, 26, 31, 0.15); overflow: hidden; }
+      .loader-bar span {
+        display: block; height: 100%; background: #8b1a1f;
+        transform-origin: left; transform: scaleX(var(--load, 0.05)); transition: transform 0.4s ease;
+      }
+      .loader .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+      @media (prefers-reduced-motion: reduce) {
+        .lf-top, .lf-bottom, .lf-cream { animation: none; }
+      }
+    </style>
+    <!-- failsafe: never leave the visitor on the loader -->
+    <script>setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 30000);</script>
+  </head>
+  <body>
+    <div class="loader" id="loader" role="status" aria-live="polite" aria-busy="true">
+      <div class="loader-fruttino" aria-hidden="true">
+        <span class="lf-top"></span><span class="lf-cream"></span><span class="lf-bottom"></span>
+      </div>
+      <p class="loader-brand" aria-hidden="true">Antica Gelateria</p>
+      <div class="loader-bar" aria-hidden="true"><span></span></div>
+      <span class="vh" data-i18n="loading">Caricamento…</span>
+    </div>
+
+    <header class="site-header">
+      <a class="brand" href="./">Antica Gelateria</a>
+      <nav class="site-nav" aria-label="Fruttini Gelato">
+        <a class="shop-link" href="https://fruttinigelato.com" target="_blank" rel="noopener noreferrer" aria-label="Acquista i Fruttini (si apre in una nuova scheda)" data-i18n-aria="shop.headerAria">
+          <span class="shop-long" data-i18n="shop.header">ACQUISTA I FRUTTINI</span>
+          <span class="shop-short" data-i18n="shop.short" aria-hidden="true">SHOP</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8" /></svg>
+        </a>
+      </nav>
+      <div class="lang" role="group" aria-label="Lingua" data-i18n-aria="lang.label">
+        <button type="button" data-lang="it" aria-pressed="true" lang="it" aria-label="Italiano">IT</button>
+        <span aria-hidden="true">/</span>
+        <button type="button" data-lang="en" aria-pressed="false" lang="en" aria-label="English">EN</button>
+      </div>
+    </header>
+
+    <main class="story" id="story">
+      <div class="stage">
+        <div class="card" id="card">
+          <p class="watermark" id="watermark">
+            <span data-i18n="mark.line1">I FRUTTINI GELATO®</span>
+            <span data-i18n="mark.line2">ORIGINALI DAL 1962</span>
+          </p>
+
+          <div class="viewport" id="viewport">
+            <canvas id="webgl" aria-label="Storia 3D animata: gli ingredienti diventano un Fruttino" data-i18n-aria="canvas.label" role="img"></canvas>
+          </div>
+
+          <div class="overlay">
+            <section class="ingredients" id="ingredients" aria-label="Ingredienti" data-i18n-aria="ing.label">
+              <h2 class="ing-title" data-line data-i18n="ing.title">INGREDIENTI</h2>
+              <ul class="ing-list">
+                <li data-line data-i18n="ing.pulp">POLPA DI FRUTTA</li>
+                <li class="plus" data-line aria-hidden="true">+</li>
+                <li data-line data-i18n="ing.water">ACQUA</li>
+                <li class="plus" data-line aria-hidden="true">+</li>
+                <li data-line data-i18n="ing.sugar">ZUCCHERO</li>
+              </ul>
+            </section>
+
+            <div class="chapters" id="chapters" aria-live="polite"></div>
+
+            <section class="finale" id="finale">
+              <h1 class="finale-title" data-part>FRUTTINO</h1>
+              <p class="finale-sub" data-part data-i18n="finale.sub">“Un piccolo frutto, una delicata sorpresa.”</p>
+              <div class="finale-actions" data-part>
+                <a class="cta" href="https://fruttinigelato.com" target="_blank" rel="noopener noreferrer">
+                  <span data-i18n="shop.cta">VISITA LO SHOP</span><span class="visually-hidden" data-i18n="newTab">(si apre in una nuova scheda)</span>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                </a>
+                <button class="replay" id="replay" type="button" tabindex="-1">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5" /></svg>
+                  <span data-i18n="replay">RIGUARDA LA STORIA</span>
+                </button>
+              </div>
+            </section>
+          </div>
+
+          <div class="controls">
+            <ol class="chapter-dots" id="chapter-dots" aria-label="Capitoli" data-i18n-aria="chapters.label"></ol>
+            <button class="autoplay" id="autoplay" type="button" aria-pressed="false">
+              <span class="icon" aria-hidden="true"></span><span class="label" data-i18n="play">Riproduci</span>
+            </button>
+          </div>
+          <div class="progress" aria-hidden="true"><div class="progress-bar" id="progress-bar"></div></div>
+        </div>
+      </div>
+    </main>
+
+    <section class="fallback" aria-label="Fruttino">
+      <figure>
+        <img src="fallback/ingredients.png" alt="Un agrume tagliato a metà con le icone di polpa di frutta, acqua e zucchero" data-i18n-alt="fallback.ingredientsAlt" />
+      </figure>
+      <div class="fallback-copy">
+        <p class="fallback-kicker" data-i18n="ing.label">Ingredienti</p>
+        <p class="fallback-list" data-i18n="fallback.list">Polpa di frutta + Acqua + Zucchero</p>
+      </div>
+      <figure>
+        <img src="fallback/fruttino.png" alt="Il Fruttino: due metà arancioni zuccherate attorno a un cuore bianco e cremoso, accanto a un piccolo agrume con due foglie" data-i18n-alt="fallback.productAlt" />
+      </figure>
+      <div class="fallback-copy">
+        <h1>FRUTTINO</h1>
+        <p class="finale-sub" data-i18n="finale.sub">“Un piccolo frutto, una delicata sorpresa.”</p>
+        <a class="cta" href="https://fruttinigelato.com" target="_blank" rel="noopener noreferrer"><span data-i18n="shop.cta">VISITA LO SHOP</span><span class="visually-hidden" data-i18n="newTab">(si apre in una nuova scheda)</span></a>
+      </div>
+    </section>
+    <noscript><style>.loader{display:none}html:not(.is-ready) body > :not(.loader){visibility:visible}.story{display:none}.fallback{display:grid}body{overflow:auto}</style></noscript>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

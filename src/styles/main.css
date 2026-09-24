@@ -1,0 +1,724 @@
+:root {
+  --ivory: #fdf6ee;
+  --cream: #fff6e8;
+  --sky: #acd8e5;
+  --beige: #e7ddd0;
+  --bordeaux: #8b1a1f;
+  --header-bg: #92233a;
+  --cocoa: #7a4a36;
+  --font-display: 'Marcellus', 'Optima', 'Candara', serif;
+  --font-serif: 'Cormorant Garamond', 'Georgia', serif;
+  --radius: 18px;
+  /* the header bar, and the depth of its wavy "curtain" hanging over the canvas */
+  --header-h: 84px;
+  --curtain: 26px;
+  --wave-w: 96px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden; /* a self-playing story: nothing to scroll */
+  background: var(--ivory);
+  color: var(--bordeaux);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+/* --------------------------------------------------------------- header */
+.site-header {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 10;
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(20px, 4vw, 76px);
+  background: var(--header-bg);
+  color: #fff;
+}
+
+/* the curtain: a soft wave with a stitched seam, hanging over the canvas */
+.site-header::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% - 1px);
+  height: var(--curtain);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 26' preserveAspectRatio='none'%3E%3Cpath d='M0 0H96V9C84 9 72 22 48 22S12 9 0 9Z' fill='%2392233a'/%3E%3Cpath d='M0 3C12 3 24 16 48 16S84 3 96 3' fill='none' stroke='%23f2b9c1' stroke-opacity='.55' stroke-width='1.1' stroke-dasharray='3 2.6'/%3E%3C/svg%3E") 0 0 / var(--wave-w) 100% repeat-x;
+  filter: drop-shadow(0 3px 2px rgba(60, 10, 20, 0.18));
+  pointer-events: none;
+}
+
+.brand {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(26px, 2.5vw, 38px);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  color: #fff;
+  text-decoration: none;
+}
+
+/* link to the shop, styled like the reference's header menu */
+.site-nav {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.shop-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 4px;
+  color: #fff;
+  font-size: clamp(14px, 1.25vw, 19px);
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+  transition: background-size 0.3s ease;
+}
+
+.shop-link:hover {
+  background-size: 100% 1px;
+}
+
+.shop-link:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+}
+
+.shop-link svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.shop-short {
+  display: none;
+}
+
+.brand:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+}
+
+/* ---------------------------------------------------------------- stage */
+.story {
+  position: relative;
+}
+
+.stage {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+}
+
+.card {
+  --bg-a: #acd8e5;
+  --bg-b: #9fd0df;
+  position: absolute;
+  inset: var(--header-h) 0 0 0;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 38% 32%, var(--bg-a) 0%, var(--bg-a) 35%, var(--bg-b) 100%);
+}
+
+/* the 3D and the typography start below the curtain, so it never hides them */
+.viewport,
+.overlay {
+  position: absolute;
+  inset: var(--curtain) 0 0 0;
+}
+
+#webgl {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  outline: none;
+}
+
+.overlay {
+  pointer-events: none;
+}
+
+/* Brand claim: fixed, large and softly blurred behind the 3D scene (the
+   canvas is transparent). Its colour follows the background (--mark). */
+.watermark {
+  --mark: rgba(255, 255, 255, 0.5);
+  /* --mk: 0 while the story plays (centred), 1 in the finale, where it moves
+     into the empty band of the still life so it never crosses the headline */
+  --mk: 0;
+  --mk-shift: -32vh;
+  /* entrance offset (px), tweened to 0 when chapter 05 begins */
+  --rise: 0;
+  position: absolute;
+  inset: var(--curtain) 0 0 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.06em;
+  padding: 0 3vw;
+  font-family: var(--font-display);
+  font-size: clamp(40px, 7.6vw, 150px);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-align: center;
+  white-space: nowrap;
+  color: var(--mark);
+  transform: translateY(calc(var(--mk) * var(--mk-shift) + var(--rise) * 1px)) scale(calc(1 - var(--mk) * 0.42));
+  filter: blur(2.5px);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ---------------------------------------------------------- ingredients */
+.ingredients {
+  position: absolute;
+  left: 54%;
+  top: 50%;
+  transform: translateY(-52%);
+  line-height: 1;
+}
+
+.ing-title {
+  margin: 0 0 0.55em;
+  font-weight: 400;
+  font-size: clamp(30px, 3.3vw, 56px);
+  letter-spacing: 0.01em;
+  color: var(--cream);
+}
+
+.ing-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: clamp(32px, 3.6vw, 62px);
+  color: var(--bordeaux);
+}
+
+.ing-list li {
+  margin: 0 0 0.16em;
+}
+
+.ing-list .plus {
+  font-size: 0.72em;
+  line-height: 1.05;
+}
+
+/* -------------------------------------------------------------- chapters */
+/* top-right: the one corner no scene of the story ever occupies */
+.chapters {
+  position: absolute;
+  right: clamp(24px, 3vw, 48px);
+  top: clamp(24px, 4.5vh, 48px);
+  width: min(400px, 44%);
+  text-align: right;
+}
+
+.chapter {
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: grid;
+  justify-items: end;
+  gap: 5px;
+  visibility: hidden;
+}
+
+.chapter-num {
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  color: var(--bordeaux);
+  opacity: 0.75;
+}
+
+.chapter-title {
+  font-size: clamp(22px, 2.1vw, 32px);
+  color: var(--bordeaux);
+}
+
+.chapter-caption {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(17px, 1.35vw, 22px);
+  line-height: 1.3;
+  color: #3f302c;
+}
+
+/* ---------------------------------------------------------------- finale */
+.finale {
+  position: absolute;
+  left: 7%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40%;
+  pointer-events: none;
+}
+
+.finale-title {
+  margin: 0;
+  font-weight: 400;
+  font-size: clamp(48px, 7.2vw, 124px);
+  letter-spacing: 0.06em;
+  line-height: 1;
+  color: var(--bordeaux);
+  visibility: hidden;
+}
+
+.finale-sub {
+  margin: 0.55em 0 1.6em;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(20px, 2vw, 32px);
+  color: var(--cocoa);
+  visibility: hidden;
+}
+
+.finale-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 14px;
+  visibility: hidden;
+  pointer-events: auto;
+}
+
+/* primary action: go to the shop */
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 24px 12px;
+  border: 1px solid var(--header-bg);
+  border-radius: 999px;
+  background: var(--header-bg);
+  color: #fff;
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  text-decoration: none;
+  transition: background-color 0.25s ease, transform 0.25s ease;
+}
+
+.cta:hover {
+  background: #7a1b2f;
+  transform: translateY(-1px);
+}
+
+.cta:focus-visible {
+  outline: 2px solid var(--bordeaux);
+  outline-offset: 3px;
+}
+
+.cta svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.replay {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px 11px;
+  border: 1px solid rgba(139, 26, 31, 0.45);
+  border-radius: 999px;
+  background: rgba(253, 246, 238, 0.35);
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  color: var(--bordeaux);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+.replay svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.replay:hover {
+  background: rgba(253, 246, 238, 0.8);
+  border-color: var(--bordeaux);
+}
+
+.replay:focus-visible,
+.autoplay:focus-visible {
+  outline: 2px solid var(--bordeaux);
+  outline-offset: 3px;
+}
+
+/* -------------------------------------------------------------- controls */
+.controls {
+  position: absolute;
+  right: clamp(16px, 2.4vw, 34px);
+  bottom: clamp(18px, 3vh, 28px);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.chapter-dots {
+  display: flex;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* chapter indicators (not interactive: the story plays by itself) */
+.dot {
+  position: relative;
+  width: 22px;
+  height: 22px;
+}
+
+.dot::before {
+  content: '';
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  border: 1px solid var(--bordeaux);
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.dot.is-active::before {
+  background: var(--bordeaux);
+  transform: scale(1.25);
+}
+
+.dot.is-done::before {
+  background: rgba(139, 26, 31, 0.35);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.autoplay {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 14px 7px 12px;
+  border: 1px solid rgba(139, 26, 31, 0.4);
+  border-radius: 999px;
+  background: rgba(253, 246, 238, 0.4);
+  color: var(--bordeaux);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+}
+
+.autoplay:hover {
+  background: rgba(253, 246, 238, 0.8);
+}
+
+.autoplay .icon {
+  width: 0;
+  height: 0;
+  border-left: 8px solid currentColor;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+}
+
+.autoplay.is-playing .icon {
+  width: 8px;
+  height: 10px;
+  border: 0;
+  border-left: 3px solid currentColor;
+  border-right: 3px solid currentColor;
+}
+
+/* language switch: IT / EN (in the header) */
+.lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.lang button {
+  padding: 8px 9px 7px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: none;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.16em;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.lang button:hover {
+  color: #fff;
+}
+
+.lang button[aria-pressed='true'] {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+.lang button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: rgba(139, 26, 31, 0.08);
+}
+
+.progress-bar {
+  height: 100%;
+  background: var(--bordeaux);
+  transform-origin: left;
+  transform: scaleX(0);
+}
+
+/* -------------------------------------------------------------- fallback */
+.fallback {
+  display: none;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: calc(var(--header-h) + var(--curtain) + 32px) 20px 80px;
+  gap: 28px;
+  grid-template-columns: 1fr;
+  text-align: center;
+}
+
+.fallback figure {
+  margin: 0;
+}
+
+.fallback img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+}
+
+.fallback-kicker {
+  margin: 0;
+  font-size: 28px;
+}
+
+.fallback-list {
+  margin: 8px 0 0;
+  font-size: 22px;
+  letter-spacing: 0.06em;
+}
+
+.fallback h1 {
+  margin: 0;
+  font-weight: 400;
+  font-size: clamp(44px, 8vw, 96px);
+  letter-spacing: 0.06em;
+}
+
+.fallback .finale-sub {
+  visibility: visible;
+}
+
+.fallback .cta {
+  justify-self: center;
+}
+
+.no-webgl .story {
+  display: none;
+}
+
+/* the static fallback is a normal, scrollable page */
+.no-webgl body {
+  overflow: auto;
+}
+
+.no-webgl .fallback {
+  display: grid;
+}
+
+/* ---------------------------------------------------------------- mobile */
+@media (max-aspect-ratio: 17/20) {
+  .brand {
+    font-size: clamp(17px, 5vw, 24px);
+  }
+
+  :root {
+    --header-h: 60px;
+    --curtain: 18px;
+    --wave-w: 64px;
+    --radius: 14px;
+  }
+
+  .watermark {
+    /* each line stays on one row */
+    font-size: clamp(24px, 8.2vw, 60px);
+    filter: blur(1.6px);
+    --mk-shift: 30vh;
+  }
+
+  .ingredients {
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 17%;
+    transform: none;
+    text-align: center;
+  }
+
+  .ing-title {
+    font-size: clamp(24px, 7vw, 40px);
+    margin-bottom: 0.4em;
+  }
+
+  .ing-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: baseline;
+    gap: 0 0.35em;
+    font-size: clamp(22px, 6.4vw, 36px);
+    padding: 0 12px;
+  }
+
+  .ing-list li {
+    margin: 0;
+  }
+
+  .chapters {
+    left: 0;
+    right: 0;
+    width: auto;
+    top: 18px;
+    bottom: auto;
+    height: auto;
+    text-align: center;
+  }
+
+  .chapter {
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: auto;
+    justify-items: center;
+    padding: 0 18px;
+  }
+
+  .chapter-title {
+    font-size: 20px;
+  }
+
+  .chapter-caption {
+    font-size: 16px;
+  }
+
+  .finale {
+    left: 0;
+    right: 0;
+    top: 7%;
+    transform: none;
+    width: auto;
+    text-align: center;
+  }
+
+  .finale-title {
+    font-size: clamp(44px, 14vw, 72px);
+  }
+
+  .finale-actions {
+    justify-content: center;
+    gap: 10px;
+    padding: 0 16px;
+  }
+
+  .cta,
+  .replay {
+    padding: 11px 16px 10px;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+  }
+
+  .shop-long {
+    display: none;
+  }
+
+  .shop-short {
+    display: inline;
+  }
+
+  .finale-sub {
+    margin: 0.4em 0 1em;
+    font-size: clamp(18px, 5vw, 24px);
+  }
+
+  .controls {
+    left: 0;
+    right: 0;
+    justify-content: center;
+    gap: 8px;
+    bottom: 14px;
+  }
+
+  .dot {
+    width: 16px;
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .replay,
+  .dot::before,
+  .autoplay {
+    transition: none;
+  }
+}
